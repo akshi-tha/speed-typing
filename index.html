@@ -1,0 +1,232 @@
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TypeFlow — Typing Practice</title>
+<style>
+:root{
+ --bg:#0b0d12;--surface:#121720;--surface2:#171e29;--border:#263140;
+ --text:#e9eef7;--muted:#8592a5;--accent:#b8f36b;--accent2:#8bd83f;
+ --error:#ff6e83;--success:#b8f36b;--shadow:0 22px 60px rgba(0,0,0,.25)
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 15% -10%,rgba(121,179,53,.09),transparent 36%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;transition:background .25s,color .25s}
+body.light{--bg:#f4f6fa;--surface:#fff;--surface2:#f8f9fc;--border:#e2e7ef;--text:#202938;--muted:#718096;--accent:#528d15;--accent2:#73b72d;--error:#d9475e;--success:#528d15;--shadow:0 18px 45px rgba(25,40,60,.08);background:radial-gradient(ellipse at 15% -10%,rgba(121,179,53,.1),transparent 36%),var(--bg)}
+body.matrix{--bg:#050a06;--surface:#0c160e;--surface2:#101e13;--border:#1b3a21;--text:#d4ffda;--muted:#75a77d;--accent:#4bff72;--accent2:#25c94c;--error:#ff6767;--success:#4bff72}
+body.vapor{--bg:#110d20;--surface:#1c1530;--surface2:#241b3d;--border:#3a2c57;--text:#f4eaff;--muted:#b5a2d2;--accent:#ff7bda;--accent2:#67e9f5;--error:#ff6c9d;--success:#67e9f5}
+button,select,input{font:inherit;color:inherit}
+button,select{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 13px}
+button{cursor:pointer;transition:transform .15s,border-color .15s,background .15s}
+button:hover{border-color:var(--accent);transform:translateY(-1px)}
+button:active{transform:translateY(0)}
+button.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:750}
+button.selected{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--surface2))}
+select{cursor:pointer;max-width:100%}
+.container{width:min(1100px,calc(100% - 36px));margin:0 auto;padding:28px 0 60px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:34px}
+.logo{display:flex;align-items:center;gap:10px;font-size:21px;font-weight:850;letter-spacing:-.7px}
+.logo-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--bg);font-weight:900}
+.logo span{color:var(--accent)}
+.header-right{display:flex;align-items:center;gap:9px}
+.icon-button{font-size:14px}
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:23px}
+.eyebrow{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:1.7px;text-transform:uppercase;margin-bottom:7px}
+h1{font-size:clamp(27px,4vw,40px);line-height:1.12;letter-spacing:-1.4px;margin:0}
+.hero p{margin:10px 0 0;color:var(--muted);max-width:520px}
+.hero-badge{border:1px solid var(--border);background:var(--surface);padding:10px 14px;border-radius:12px;color:var(--muted);white-space:nowrap;font-size:13px}
+.hero-badge b{color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-bottom:17px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
+.stat-label{color:var(--muted);font-size:12px;font-weight:650;letter-spacing:.8px;text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.stat-value{font-size:clamp(25px,3.5vw,34px);font-weight:800;letter-spacing:-1px;margin-top:5px}
+.stat-value em{font-size:13px;color:var(--muted);font-style:normal;font-weight:500;letter-spacing:0}
+.stat-card:first-child .stat-value{color:var(--accent)}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 17px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.control-group{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.control-label{font-size:11px;color:var(--muted);font-weight:800;letter-spacing:1px;margin-right:4px}
+.time-btn{padding:8px 12px;font-size:13px}
+.passage-select{min-width:220px}
+.passage-top{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-size:12px;margin-bottom:14px}
+.passage-top strong{color:var(--text);font-size:13px}
+.typing-area{padding:25px 26px 22px;position:relative;min-height:215px;cursor:text}
+.passage-text{font-size:clamp(18px,2.1vw,23px);line-height:1.95;letter-spacing:.1px;word-spacing:1px;font-family:var(--typing-font,inherit);white-space:pre-wrap;word-break:break-word}
+.passage-text span{transition:color .08s,background .08s}
+.passage-text .correct{color:var(--success)}
+.passage-text .wrong{color:var(--error);background:color-mix(in srgb,var(--error) 15%,transparent);border-radius:4px}
+.passage-text .current{position:relative}
+.passage-text .current:before{content:"";position:absolute;left:-2px;top:5%;height:90%;width:2px;background:var(--accent);border-radius:2px;animation:caret 1s step-end infinite}
+@keyframes caret{50%{opacity:0}}
+.passage-text .pending{color:var(--muted)}
+.hidden-input{position:absolute;opacity:0;pointer-events:none;left:-10000px}
+.progress{height:3px;background:var(--border)}
+.progress-fill{height:100%;width:0;background:var(--accent);transition:width .12s linear}
+.test-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-top:1px solid var(--border);flex-wrap:wrap}
+.test-status{color:var(--muted);font-size:13px}
+.footer-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.secondary{font-size:13px}
+.bottom-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:15px;margin-top:17px}
+.small-panel{padding:17px 19px}
+.small-panel h3{font-size:14px;margin:0 0 13px}
+.setting-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--border)}
+.setting-row:first-of-type{border-top:0}
+.setting-row span{color:var(--muted);font-size:13px}
+.setting-row select{padding:8px;font-size:13px}
+.switch{position:relative;width:42px;height:24px;border-radius:20px;border:0;background:#46505f;padding:0}
+.switch:after{content:"";position:absolute;width:18px;height:18px;background:white;border-radius:50%;left:3px;top:3px;transition:.2s}
+.switch.on{background:var(--accent)}
+.switch.on:after{left:21px;background:var(--bg)}
+.results{display:none;margin-top:18px;padding:20px}
+.results.visible{display:block}
+.results-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.results h2{margin:0;font-size:21px}
+.result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}
+.result-box{background:var(--surface2);border-radius:12px;padding:12px}
+.result-box small{display:block;color:var(--muted);font-size:12px}
+.result-box strong{display:block;font-size:22px;color:var(--accent);margin-top:3px}
+.chart-wrap{border:1px solid var(--border);border-radius:12px;padding:9px;background:var(--surface2)}
+canvas{width:100%;height:150px;display:block}
+.history{margin-top:18px}
+.history-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.history h3{font-size:14px;margin:0}
+.history-list{display:flex;gap:9px;overflow:auto}
+.history-item{min-width:130px;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:11px 13px}
+.history-item b{color:var(--accent);font-size:19px;display:block}
+.history-item small{color:var(--muted)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,15px);opacity:0;pointer-events:none;background:var(--surface);border:1px solid var(--border);padding:10px 16px;border-radius:12px;box-shadow:var(--shadow);transition:.2s;z-index:5}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:36px}
+@media(max-width:720px){.container{padding-top:18px}.hero{align-items:flex-start;flex-direction:column}.hero-badge{display:none}.toolbar{align-items:flex-start}.control-group{width:100%}.passage-select{flex:1;min-width:0}.typing-area{padding:18px;min-height:200px}.bottom-grid{grid-template-columns:1fr}.result-grid{grid-template-columns:repeat(2,1fr)}header{margin-bottom:25px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+ <div class="logo"><div class="logo-icon">T</div>Type<span>Flow</span></div>
+ <div class="header-right"><button class="icon-button" id="soundBtn">🔊 Sound on</button><button class="icon-button" id="themeBtn">☼ Theme</button></div>
+</header>
+
+<section class="hero">
+ <div><div class="eyebrow">Typing practice studio</div><h1>Find your flow.<br>Build your speed.</h1><p>Focus on the words, find your rhythm, and watch your accuracy improve.</p></div>
+ <div class="hero-badge">✦ <b>15 curated passages</b> · Every session is different</div>
+</section>
+
+<section class="stats">
+ <div class="stat-card"><div class="stat-label">⚡ Speed</div><div class="stat-value" id="liveWpm">0 <em>WPM</em></div></div>
+ <div class="stat-card"><div class="stat-label">◎ Accuracy</div><div class="stat-value" id="liveAccuracy">100<em>%</em></div></div>
+ <div class="stat-card"><div class="stat-label">◷ Time left</div><div class="stat-value" id="liveTime">60<em>s</em></div></div>
+</section>
+
+<section class="panel" id="testPanel">
+ <div class="toolbar">
+  <div class="control-group"><span class="control-label">DURATION</span><button class="time-btn" data-time="15">15s</button><button class="time-btn" data-time="30">30s</button><button class="time-btn selected" data-time="60">60s</button><button class="time-btn" data-time="120">120s</button><select id="customDuration" aria-label="Custom duration"><option value="">Custom…</option><option value="45">45 seconds</option><option value="90">90 seconds</option><option value="180">3 minutes</option></select></div>
+  <div class="control-group"><span class="control-label">PASSAGE</span><select id="passageSelect" class="passage-select"></select></div>
+ </div>
+ <div class="typing-area" id="typingArea">
+  <div class="passage-top"><span id="passageCategory">DAILY LIFE</span><strong id="passageCounter">Passage 1 / 15</strong></div>
+  <div class="passage-text" id="passageText"></div>
+  <input class="hidden-input" id="typingInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+ </div>
+ <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+ <div class="test-footer"><span class="test-status" id="testStatus">Click the passage or start typing to begin.</span><div class="footer-actions"><button class="secondary" id="strictBtn">Strict mode: Off</button><button class="secondary" id="newPassageBtn">↻ New passage</button><button class="primary" id="restartBtn">Restart test</button></div></div>
+</section>
+
+<div class="bottom-grid">
+ <section class="panel small-panel"><h3>Personalize your test</h3>
+  <div class="setting-row"><span>Typeface</span><select id="fontSelect"><option value="system">Modern sans</option><option value="serif">Classic serif</option><option value="mono">Monospace</option></select></div>
+  <div class="setting-row"><span>Error sound</span><button class="switch on" id="errorSwitch" aria-label="Toggle error sound"></button></div>
+  <div class="setting-row"><span>Correct keystroke sound</span><button class="switch" id="keySwitch" aria-label="Toggle typing sound"></button></div>
+ </section>
+ <section class="panel small-panel"><h3>Quick tips</h3>
+  <div class="setting-row"><span>Focus on accuracy first.</span><b>✓</b></div>
+  <div class="setting-row"><span>Timer starts with your first key.</span><b>⌨</b></div>
+  <div class="setting-row"><span>Press Tab anytime to restart.</span><b>↻</b></div>
+ </section>
+</div>
+
+<section class="panel results" id="results">
+ <div class="results-head"><h2>Session complete ✦</h2><button id="retryBtn" class="primary">Practice again</button></div>
+ <div class="result-grid">
+  <div class="result-box"><small>Net WPM</small><strong id="resultWpm">0</strong></div>
+  <div class="result-box"><small>Gross WPM</small><strong id="grossWpm">0</strong></div>
+  <div class="result-box"><small>Accuracy</small><strong id="resultAccuracy">0%</strong></div>
+  <div class="result-box"><small>Characters</small><strong id="resultChars">0</strong></div>
+  <div class="result-box"><small>Correct</small><strong id="resultCorrect">0</strong></div>
+  <div class="result-box"><small>Errors</small><strong id="resultErrors">0</strong></div>
+  <div class="result-box"><small>Elapsed</small><strong id="resultDuration">0s</strong></div>
+  <div class="result-box"><small>Missed keys</small><strong id="weakKeys">—</strong></div>
+ </div>
+ <h3 style="font-size:14px;margin:0 0 10px">Speed through the session</h3><div class="chart-wrap"><canvas id="chart" width="900" height="150"></canvas></div>
+</section>
+
+<section class="history"><div class="history-head"><h3>Recent sessions</h3><button class="secondary" id="clearHistory">Clear history</button></div><div class="history-list" id="historyList"></div></section>
+<footer>Made for focus, flow, and better typing. Your session history stays on this device.</footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const passages=[
+{title:"A Quiet Morning",category:"DAILY LIFE",text:"The morning sun slipped through the curtains and painted the room in a warm shade of gold. Outside, a few birds were already searching for breakfast. She made a cup of tea, opened the window, and took a moment to enjoy the peaceful start of a new day."},
+{title:"The Power of Practice",category:"MINDSET",text:"Progress rarely happens all at once. It grows from small actions repeated with patience and care. A few minutes of practice today may seem unimportant, but those minutes become hours of experience. Over time, effort turns into confidence, and difficult tasks begin to feel natural."},
+{title:"Technology and Tomorrow",category:"TECHNOLOGY",text:"Technology is changing the way people learn, work, and communicate. New tools can make complicated tasks easier, but the most useful inventions are often those that solve simple problems. The future will belong to people who remain curious and learn how to adapt."},
+{title:"A Walk in the Forest",category:"NATURE",text:"A narrow path led deeper into the forest, where tall trees formed a green roof above the trail. The air smelled of wet earth and leaves. Every now and then, sunlight reached the ground in bright patches, illuminating tiny flowers beside the path."},
+{title:"Travel Light",category:"TRAVEL",text:"Travel is not only about visiting famous places. Sometimes the best memories come from a quiet café, a conversation with a stranger, or a train ride through unfamiliar countryside. Leave room in your plans for unexpected moments, because they often become the stories you remember."},
+{title:"Creative Thinking",category:"CREATIVITY",text:"Ideas often appear when we stop trying to force them. A walk, a new book, or a conversation can offer a fresh perspective. Keep a notebook nearby and write down thoughts as they arrive. A small idea today might become something remarkable tomorrow."},
+{title:"The Ocean",category:"SCIENCE",text:"The ocean covers most of our planet and contains an extraordinary variety of life. Its currents influence weather, its ecosystems support countless species, and its depths remain full of mysteries. Protecting these waters is essential for the health of the Earth."},
+{title:"A Helpful Neighbor",category:"COMMUNITY",text:"When the rain began, a neighbor noticed that the elderly couple across the street had left their garden tools outside. He carried them under the porch and checked whether the windows were closed. A small act of kindness made an ordinary afternoon a little brighter."},
+{title:"Digital Balance",category:"WELLNESS",text:"A healthy relationship with technology begins with intention. Turn off unnecessary notifications, take regular breaks, and spend some time away from screens. These simple habits can help you pay attention to the people around you and the things that matter most."},
+{title:"The Night Sky",category:"SPACE",text:"Far from the city lights, the night sky reveals thousands of stars. Some have been shining for millions of years, and their light travels across enormous distances before reaching our eyes. Looking up reminds us how much there is to discover."},
+{title:"Learning a Language",category:"LEARNING",text:"Learning a language takes time, but daily exposure makes a real difference. Listen to conversations, read short stories, and practice speaking without worrying about every mistake. The goal is not perfection; it is to communicate, understand, and keep improving."},
+{title:"The Small Garden",category:"LIFESTYLE",text:"The garden was small, but it had everything she needed. Tomatoes grew beside fragrant herbs, and colorful flowers attracted butterflies in the afternoon. Watering the plants became a relaxing routine that helped her slow down and appreciate the changing seasons."},
+{title:"Building Good Habits",category:"PRODUCTIVITY",text:"Good habits are easier to maintain when they fit naturally into your day. Start with a simple action, connect it to an existing routine, and celebrate consistency rather than intensity. When a habit becomes automatic, you can gradually make it more challenging."},
+{title:"A Museum Visit",category:"CULTURE",text:"The museum was quiet except for the soft footsteps of visitors moving between galleries. A painting of an ordinary street caught her attention because of the light in its windows. She stood there for several minutes, noticing details she had missed at first."},
+{title:"The Next Chapter",category:"INSPIRATION",text:"Every ending creates space for a beginning. You do not need to have every answer before taking the next step. Choose a direction, learn from what happens, and adjust along the way. Your path may look different from others, and that is perfectly fine."}
+];
+let duration=60,passageIndex=0,passage=passages[0],typed="",started=false,finished=false,startAt=0,timer=null,strict=false,errorSound=true,keySound=false,history=[],chartData=[],wrongKeys={};
+const $=id=>document.getElementById(id);
+const input=$("typingInput");
+function init(){passages.forEach((p,i)=>{let o=document.createElement("option");o.value=i;o.textContent=`${String(i+1).padStart(2,"0")} · ${p.title}`;$("passageSelect").appendChild(o)});loadHistory();renderPassage();renderHistory();}
+function renderPassage(){passage=passages[passageIndex];$("passageCategory").textContent=passage.category;$("passageCounter").textContent=`Passage ${passageIndex+1} / ${passages.length}`;$("passageSelect").value=passageIndex;renderText();$("testStatus").textContent="Click the passage or start typing to begin.";}
+function renderText(){let out="";for(let i=0;i<passage.text.length;i++){let cls="pending";if(i<typed.length)cls=typed[i]===passage.text[i]?"correct":"wrong";if(i===typed.length&&!finished)cls+=" current";let ch=passage.text[i];out+=`<span class="${cls}">${ch===" "?"&nbsp;":escapeHtml(ch)}</span>`;}$("passageText").innerHTML=out;$("progressFill").style.width=(typed.length/passage.text.length*100)+"%";}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+let audio=null;function initAudio(){try{if(!audio)audio=new(window.AudioContext||window.webkitAudioContext)();if(audio.state==="suspended")audio.resume()}catch(e){}}
+function tone(freq,dur,gain,wave="sine"){if(!audio)return;try{let o=audio.createOscillator(),g=audio.createGain();o.type=wave;o.frequency.value=freq;g.gain.setValueAtTime(gain,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+dur);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+dur)}catch(e){}}
+function mistakeSound(){if(errorSound){initAudio();tone(145,.13,.24,"triangle");}}
+function correctSound(){if(keySound){initAudio();tone(510,.025,.025,"sine");}}
+document.addEventListener("pointerdown",initAudio,{once:true});document.addEventListener("keydown",initAudio,{once:true});
+function resetTest(){clearInterval(timer);typed="";started=false;finished=false;startAt=0;chartData=[];wrongKeys={};$("results").classList.remove("visible");$("liveWpm").innerHTML='0 <em>WPM</em>';$("liveAccuracy").innerHTML='100<em>%</em>';$("liveTime").innerHTML=duration+'<em>s</em>';$("testStatus").textContent="Click the passage or start typing to begin.";input.value="";renderText();input.focus();}
+function begin(){if(started||finished)return;started=true;startAt=Date.now();$("testStatus").textContent="Keep going — you're in the flow.";timer=setInterval(updateTimer,100);}
+function elapsed(){return started?Math.max(.1,(Date.now()-startAt)/1000):0;}
+function correctCount(){let n=0;for(let i=0;i<typed.length;i++)if(typed[i]===passage.text[i])n++;return n;}
+function updateTimer(){let sec=elapsed(),left=Math.max(0,duration-sec);$("liveTime").innerHTML=Math.ceil(left)+'<em>s</em>';let gross=typed.length/5/(sec||1)*60,acc=typed.length?correctCount()/typed.length*100:100;$("liveWpm").innerHTML=Math.round(gross*acc/100)+' <em>WPM</em>';$("liveAccuracy").innerHTML=Math.round(acc)+'<em>%</em>';if(Math.floor(sec)>chartData.length)chartData.push({sec:Math.floor(sec),wpm:Math.round(gross*acc/100)});if(left<=0)finish();}
+function finish(){if(finished)return;finished=true;started=false;clearInterval(timer);$("testStatus").textContent="Session complete. Nice work!";renderText();showResults();}
+function keyHandler(e){if(e.key==="Tab"){e.preventDefault();resetTest();return;}if(e.key==="Escape"){input.blur();return;}if(finished)return;if(e.key==="Backspace"){e.preventDefault();typed=typed.slice(0,-1);input.value=typed;renderText();return;}if(e.key.length!==1||e.ctrlKey||e.metaKey||e.altKey)return;e.preventDefault();if(!started)begin();let expected=passage.text[typed.length];if(e.key===expected){typed+=e.key;correctSound();}else{mistakeSound();wrongKeys[e.key]=(wrongKeys[e.key]||0)+1;if(strict){toast("Wrong key — strict mode is on");return;}typed+=e.key;}input.value=typed;renderText();if(typed.length>=passage.text.length)finish();}
+input.addEventListener("keydown",keyHandler);$("typingArea").addEventListener("click",()=>input.focus());$("passageText").addEventListener("click",()=>input.focus());
+function showResults(){let sec=Math.max(1,Math.min(duration,elapsed())),correct=correctCount(),acc=typed.length?correct/typed.length*100:0,gross=typed.length/5/sec*60,net=gross*acc/100;$("resultWpm").textContent=Math.round(net);$("grossWpm").textContent=Math.round(gross);$("resultAccuracy").textContent=Math.round(acc)+"%";$("resultChars").textContent=typed.length;$("resultCorrect").textContent=correct;$("resultErrors").textContent=typed.length-correct;$("resultDuration").textContent=Math.round(sec)+"s";$("weakKeys").textContent=Object.entries(wrongKeys).sort((a,b)=>b[1]-a[1]).slice(0,4).map(x=>x[0]).join(" ")||"—";$("results").classList.add("visible");drawChart();history.unshift({wpm:Math.round(net),acc:Math.round(acc),date:new Date().toLocaleDateString(),passage:passage.title,duration});history=history.slice(0,8);saveHistory();renderHistory();$("results").scrollIntoView({behavior:"smooth",block:"nearest"});}
+function drawChart(){let c=$("chart"),ctx=c.getContext("2d"),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue("--border");for(let y=20;y<h;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}let d=chartData.length?chartData:[{sec:0,wpm:0}],max=Math.max(15,...d.map(x=>x.wpm));ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue("--accent");ctx.lineWidth=3;ctx.beginPath();d.forEach((v,i)=>{let x=i/(Math.max(1,d.length-1))*w,y=h-12-v.wpm/max*(h-25);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();}
+function saveHistory(){localStorage.setItem("typeflowHistory",JSON.stringify(history));}
+function loadHistory(){try{history=JSON.parse(localStorage.getItem("typeflowHistory")||"[]")}catch(e){history=[]}}
+function renderHistory(){$("historyList").innerHTML=history.length?history.map(h=>`<div class="history-item"><b>${h.wpm} WPM</b><small>${h.acc}% accuracy</small><small>${escapeHtml(h.passage||"Practice")} · ${h.date}</small></div>`).join(""):'<div style="color:var(--muted);font-size:13px">Your completed tests will appear here.</div>';}
+function toast(msg){let el=$("toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),1300);}
+document.querySelectorAll("[data-time]").forEach(b=>b.onclick=()=>{duration=+b.dataset.time;document.querySelectorAll("[data-time]").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");resetTest();});
+$("customDuration").onchange=e=>{if(e.target.value){duration=+e.target.value;document.querySelectorAll("[data-time]").forEach(x=>x.classList.remove("selected"));resetTest();}};
+$("passageSelect").onchange=e=>{passageIndex=+e.target.value;renderPassage();resetTest();};
+$("newPassageBtn").onclick=()=>{passageIndex=(passageIndex+1+Math.floor(Math.random()*(passages.length-1)))%passages.length;renderPassage();resetTest();};
+$("restartBtn").onclick=resetTest;$("retryBtn").onclick=resetTest;
+$("strictBtn").onclick=()=>{strict=!strict;$("strictBtn").textContent="Strict mode: "+(strict?"On":"Off");$("strictBtn").classList.toggle("selected",strict);toast(strict?"Mistakes must be corrected":"Mistakes will be counted");};
+$("soundBtn").onclick=()=>{errorSound=!errorSound;$("soundBtn").textContent=errorSound?"🔊 Sound on":"🔇 Sound off";if(errorSound)initAudio();};
+$("errorSwitch").onclick=()=>{errorSound=!errorSound;$("errorSwitch").classList.toggle("on",errorSound);$("soundBtn").textContent=errorSound?"🔊 Sound on":"🔇 Sound off";if(errorSound)initAudio();};
+$("keySwitch").onclick=()=>{keySound=!keySound;$("keySwitch").classList.toggle("on",keySound);if(keySound)initAudio();};
+$("fontSelect").onchange=e=>{let f=e.target.value;$("passageText").style.fontFamily=f==="serif"?"Georgia,'Times New Roman',serif":f==="mono":"'SFMono-Regular',Consolas,monospace":"Inter,system-ui,sans-serif";};
+$("themeBtn").onclick=()=>{let themes=["","light","matrix","vapor"],idx=(themes.indexOf(document.body.className)+1)%themes.length;document.body.className=themes[idx];$("themeBtn").textContent=["☾ Dark","☼ Light","⌁ Matrix","✦ Vapor"][idx];};
+$("clearHistory").onclick=()=>{history=[];saveHistory();renderHistory();toast("History cleared");};
+init();
+</script>
+</body>
+</html>'''
+Path("/mnt/data/typeflow_typing_test.html").write_text(html, encoding="utf-8")
+print("Created redesigned TypeFlow with 15 passages.")
